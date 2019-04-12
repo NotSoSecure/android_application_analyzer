@@ -1,4 +1,4 @@
-import Queue
+import queue
 import threading
 import subprocess
 from gui import *
@@ -7,12 +7,12 @@ import time
 from PyQt5.QtCore import QThread
 
 class AsynchronousFileRead(QThread):
-    def __init__(self, fd, queue):
-        assert isinstance(queue, Queue.Queue)
+    def __init__(self, fd, queueobj):
+        assert isinstance(queueobj, queue.Queue)
         assert callable(fd.readline)
         QThread.__init__(self) 
         self._fd = fd
-        self._queue = queue
+        self._queue = queueobj
 
     def run(self):
         '''The body of the tread: read lines and put them on the queue.'''
@@ -30,12 +30,11 @@ class Logcat(QThread):
         self.mainWin = mainWin
         self.device=device
         QThread.__init__(self) 
-        #threading.Thread.__init__(self)
 
     def run(self):
         cmd="adb -s "+self.device+" logcat"
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-        self.stdout_queue = Queue.Queue()
+        self.stdout_queue = queue.Queue()
         self.stdout_reader = AsynchronousFileRead(process.stdout, self.stdout_queue)
         self.stdout_reader.start()
         time.sleep(1)
@@ -45,10 +44,10 @@ class Logcat(QThread):
                 break
             
             while not self.stdout_queue.empty():
-                line+=self.stdout_queue.get()
+                line+=str(self.stdout_queue.get(), 'utf-8')
             
             if line:
                 self.mainWin.txtLogcat.append(line.strip())
             time.sleep(1)
-        print "Wait to stop logcat....."
+        print ("Wait to stop logcat.....")
         self.stdout_reader.join()

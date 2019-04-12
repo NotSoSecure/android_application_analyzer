@@ -11,7 +11,7 @@ from gui import *
 from banner import *
 from logcat import *
 import urllib
-from HTMLParser import HTMLParser
+import html
 
 class Main:
 	def __init__(self, mainWin):
@@ -126,7 +126,7 @@ class Main:
 			for appContent in appContents:
 				self.mainWin.lstAppDirs.addItem(QListWidgetItem(appContent))
 		else:
-			print "Multiple Item Selected"
+			print ("Multiple Item Selected")
 
 	def ListFileFromDir(self):
 		if len(self.mainWin.lstApps.selectedItems()) == 1 and len(self.mainWin.lstAppDirs.selectedItems()) == 1:
@@ -139,23 +139,22 @@ class Main:
 			for file in appDirFiles:
 				self.mainWin.lstAppDirFiles.addItem(QListWidgetItem(file))
 		else:
-			print "Multiple Item Selected"
+			print ("Multiple Item Selected")
 
 	def DisplayFileContent(self):
 		mainWin.chkLogcat.setChecked(False)
 		if len(self.mainWin.lstAppDirFiles.selectedItems()) == 1:
 			deviceName=self.mainWin.cmbDevice.currentText()
 			filePath=(self.mainWin.lstAppDirFiles.selectedItems()[0].text())
-			self.mainWin.txtFileContent.setText(self.GetFileContent(deviceName, filePath))
-			fileType=self.mainWin.txtFileContent.toPlainText()
-			if fileType=="SQLite format 3":
+			fileContent=self.GetFileContent(deviceName, filePath).strip()
+			if fileContent.find("SQLite format 3") == 0:
 				if not os.path.exists("dbs"):
 					os.makedirs("dbs")
 				fileName=filePath[filePath.rfind('/')+1:]
 				dbPath="./dbs/"+fileName
 				self.DownloadDBFile(deviceName, filePath, dbPath)
 				tableList=self.GetAllTables(dbPath)
-				self.mainWin.txtFileContent.append("SQLiteDB : "+dbPath)
+				self.mainWin.txtFileContent.setText("SQLiteDB : "+dbPath)
 				for table in tableList:
 					self.mainWin.txtFileContent.append("\n\n\nTable => " + table.format(type(str), repr(str)))
 					rows=self.GetTableData(dbPath, table)
@@ -178,11 +177,21 @@ class Main:
 						self.mainWin.txtFileContent.append("-"*dataLen)
 						self.mainWin.txtFileContent.append(rowData)
 						self.mainWin.txtFileContent.append("-"*dataLen)
+			elif fileContent.find("ELF") == 1:
+				if not os.path.exists("lib"):
+					os.makedirs("lib")
+				fileName=filePath[filePath.rfind('/')+1:]
+				libPath="./lib/"+fileName
+				self.DownloadDBFile(deviceName, filePath, libPath)
+				self.mainWin.txtFileContent.setText("Performed \"strings\" command on : ELF lib :" + libPath + "\n\n")
+				self.mainWin.txtFileContent.append(self.cmdExecutor.ExecuteCommand("strings " + libPath, False))
+			else:
+				self.mainWin.txtFileContent.setText(fileContent)
+				
 		else:
-			print "Multiple Item Selected"
+			print ("Multiple Item Selected")
 		if mainWin.chkHtmlDecode.isChecked():
-			parser=HTMLParser()
-			text=parser.unescape(self.mainWin.txtFileContent.toPlainText())
+			text=html.unescape(self.mainWin.txtFileContent.toPlainText())
 			self.mainWin.txtFileContent.setText(text)
 
 		if mainWin.chkURLDecode.isChecked():
@@ -204,9 +213,8 @@ class Main:
 
 	def DecodeHTMLEntity(self):
 		text=self.mainWin.txtFileContent.toPlainText()
-		parser=HTMLParser()
 		if mainWin.chkHtmlDecode.isChecked():
-			text=parser.unescape(text)
+			text=html.unescape(text)
 			self.mainWin.txtFileContent.setText(text) 
 		else:
 			self.DisplayFileContent()
@@ -221,7 +229,7 @@ class Main:
 		
 
 if __name__ == "__main__":
-    print getBanner()
+    print (getBanner())
     app = QtWidgets.QApplication(sys.argv)
     mainWin = Gui()
     mainWin.show()
@@ -248,7 +256,7 @@ if __name__ == "__main__":
 	    main.ListApplication()
 	    sys.exit( app.exec_() )
     else:
-    	print "No emulator found. Re-run the applicaiton after connecting device\n\n"
+    	print ("No emulator found. Re-run the applicaiton after connecting device\n\n")
 
 
 
