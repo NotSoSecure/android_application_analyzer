@@ -17,12 +17,12 @@ Analyze the sensitive information logcat logs as shown in Figure:
 
 # Future Enhancement
 
-[x] Strings command on “so or library” file
-[x] Compatible with python3
-[ ] Deep search :- Find all the files of the application from the entire storage
-[ ] Right click save menu :- To Save the file content for future reference
-[ ] Snapshot button :- Copy entire application directory for future reference
-[ ] The dropdown list of the application instead of Text Box 
+- [x] Strings command on “so or library” file
+- [x] Compatible with python3
+- [ ] Deep search :- Find all the files of the application from the entire storage
+- [ ] Right click save menu :- To Save the file content for future reference
+- [ ] Snapshot button :- Copy entire application directory for future reference
+- [ ] The dropdown list of the application instead of Text Box 
 
 
 # References
