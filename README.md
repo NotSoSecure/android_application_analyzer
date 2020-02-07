@@ -20,9 +20,13 @@ Analyze the sensitive information logcat logs as shown in Figure:
 [x] Strings command on “so or library” file
 [x] Compatible with python3
 [ ] Deep search :- Find all the files of the application from the entire storage
-[ ] Right click save menu :- To Save the file content for future reference
-[ ] Snapshot button :- Copy entire application directory for future reference
-[ ] The dropdown list of the application instead of Text Box 
+[x] Snapshot button :- Copy entire application directory for future reference
+[x] The dropdown list of the application instead of Text Box
+[x] One clikc application decompile using apktool
+[x] One click JD GUI application navigation
+[x] One click reinstall the APK using (uninstall app -> apktool rebuild app -> sign.jar (sign apk)-> install app)
+[x] One click mobSF analysis (prerequisite: mobSF installation required)
+	Note: as of now update the mobSF endpoint in GlobalVariables.py and "mobSFURL" variable
 
 
 # References
