@@ -1,5 +1,5 @@
 import sys
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QSize, QRect
 from GlobalVariables import *
@@ -16,29 +16,50 @@ class Gui(QMainWindow):
         quit.triggered.connect(self.closeEvent)
 
         self.device_lable = QLabel(centralWidget)
-        self.device_lable.setGeometry(QRect(10, 5, 85, 30))
+        self.device_lable.setGeometry(QRect(10, 5, 85, 40))
         self.device_lable.setText("Select Device")
         self.cmbDevice = QComboBox(centralWidget)
-        self.cmbDevice.setGeometry(QRect(95, 5, 400, 30))
+        self.cmbDevice.setGeometry(QRect(95, 5, 400, 40))
         self.cmbDevice.setObjectName(("cmbDevice")) 
 
-        self.device_lable = QLabel(centralWidget)
-        self.device_lable.setGeometry(QRect(10, 40, 250, 30))
-        self.device_lable.setText("Select Application")
-        self.lstApps = QListWidget(centralWidget)
-        self.lstApps.setGeometry(QRect(10, 70, 250, 150))
+        self.app_label = QLabel(centralWidget)
+        self.app_label.setGeometry(QRect(510, 5, 110, 40))
+        self.app_label.setText("Select Application")
+        self.cmbApp = QComboBox(centralWidget)
+        self.cmbApp.setGeometry(QRect(620, 5, 375, 40))
+        self.cmbApp.setObjectName(("cmbDevice")) 
+
+        self.btnSnapshot = QPushButton(centralWidget)
+        self.btnSnapshot.setGeometry(QRect(995, 10, 100, 30))
+        self.btnSnapshot.setText(("Snapshot"))
 
         self.appDirs = QLabel(centralWidget)
-        self.appDirs.setGeometry(QRect(270, 40, 250, 30))
+        self.appDirs.setGeometry(QRect(10, 40, 250, 30))
         self.appDirs.setText("Select Directory")
         self.lstAppDirs = QListWidget(centralWidget)
-        self.lstAppDirs.setGeometry(QRect(270, 70, 250, 150))
+        self.lstAppDirs.setGeometry(QRect(10, 70, 250, 150))
 
         self.appDirFiles = QLabel(centralWidget)
-        self.appDirFiles.setGeometry(QRect(530, 40, 480, 30))
+        self.appDirFiles.setGeometry(QRect(270, 40, 480, 30))
         self.appDirFiles.setText("Select File")
         self.lstAppDirFiles = QListWidget(centralWidget)
-        self.lstAppDirFiles.setGeometry(QRect(530, 70, 560, 150))
+        self.lstAppDirFiles.setGeometry(QRect(270, 70, 720, 150))
+
+        self.btnJDGUI = QPushButton(centralWidget)
+        self.btnJDGUI.setGeometry(QRect(995, 65, 100, 40))
+        self.btnJDGUI.setText(("jdgui"))
+
+        self.btnMobSF = QPushButton(centralWidget)
+        self.btnMobSF.setGeometry(QRect(995, 105, 100, 40))
+        self.btnMobSF.setText(("mobSF"))
+
+        self.btnAPKTool = QPushButton(centralWidget)
+        self.btnAPKTool.setGeometry(QRect(995, 145, 100, 40))
+        self.btnAPKTool.setText(("apktool"))
+
+        self.btnReinstall = QPushButton(centralWidget)
+        self.btnReinstall.setGeometry(QRect(995, 185, 100, 40))
+        self.btnReinstall.setText(("re-install"))
       
         self.lblFileContent = QLabel(centralWidget)
         self.lblFileContent.setGeometry(QRect(10, 230, 250, 30))

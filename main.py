@@ -6,22 +6,23 @@
 
 import sqlite3
 import os
-from CmdExecutor import *
+from datetime import datetime
+import urllib
+import html
 from gui import *
 from banner import *
 from logcat import *
-import urllib
-import html
+from GlobalVariables import *
 
 class Main:
 	def __init__(self, mainWin):
 		self.mainWin=mainWin
-		self.cmdExecutor=CmdExecutor()
+		self.globalVariables=GlobalVariables()
 
 	def GetDeviceList(self):
 		deviceList=[]
 		isFirstElement=True
-		for device in (self.cmdExecutor.ExecuteCommand("devices -l").strip()).split("\n"):
+		for device in (self.globalVariables.ExecuteCommand("devices -l").strip()).split("\n"):
 			try:
 				iStart=device.find("model:")
 				if iStart != -1:
@@ -33,36 +34,53 @@ class Main:
 
 	def GetApplicationList(self, device):
 		appList=[]
+		#cmd="-s "+device+" shell \"su -c ls '/data/data/'\""
 		cmd="-s "+device+" shell ls \"/data/data/\""
-		for app in (self.cmdExecutor.ExecuteCommand(cmd).strip()).split("\n"):
+		for app in (self.globalVariables.ExecuteCommand(cmd).strip()).split("\n"):
 			try:
 				appList.append(app.strip())
 			except:
 				"App not found"
 		return appList
 
-	def GetApplicationContent(self, device, appName):
-		appContents=[]
-		cmd="-s "+device+" shell ls \"/data/data/"+appName+"/\""
-		for appContent in (self.cmdExecutor.ExecuteCommand(cmd).strip()).split("\n"):
+	def GetDirContent(self, device, dir, appContents, appendPath=False):
+		#cmd="-s "+device+" shell \"su -c ls '/data/data/"+appName+"/'\""
+		cmd="-s "+device+" shell ls " + dir
+		for appContent in (self.globalVariables.ExecuteCommand(cmd).strip()).split("\n"):
 			try:
-				appContents.append(appContent.strip())
+				if appendPath:
+					appContents.append(dir.replace("\"","")+appContent.strip())
+				else:
+					appContents.append(appContent.strip())
 			except:
 				"No app content found"
+
+	def GetApplicationContent(self, device, appName):
+		appContents=[]
+		self.GetDirContent(device, "\"/data/data/"+appName+"/\"", appContents)
+		appDir=self.globalVariables.ExecuteCommand("-s {} shell ls /sdcard/Android/data/ | grep {}".format(device, self.mainWin.cmbApp.currentText())).strip()
+		if appDir != "":
+			print (appDir)
+			self.GetDirContent(device, "\"/sdcard/Android/data/"+appName+"/\"", appContents, True)
 		return appContents
 
 	'''def IsDirectory(self, device, path):
+		#cmd="-s "+device+" shell \"su -c cat "+path+"'\""
 		cmd="-s "+device+" shell cat \""+path+"\""
-		cmdOutput=self.cmdExecutor.ExecuteCommand(cmd).strip()
+		cmdOutput=self.globalVariables.ExecuteCommand(cmd).strip()
 		if cmdOutput.find("Is a directory") != -1:
 			return True
 		return False'''
 
 	def BuildFileStructure(self, device, appName, dirPath):
-		cmd="-s "+device+" shell ls -R \"/data/data/"+appName+"/"+dirPath+"/\""
+		#cmd="-s "+device+" shell \"su -c ls -R '/data/data/"+appName+"/"+dirPath+"/'\""
+		if (dirPath.find("/sdcard") == 0):
+			cmd="-s "+device+" shell ls -R \""+dirPath+"\""
+		else:
+			cmd="-s "+device+" shell ls -R \"/data/data/"+appName+"/"+dirPath+"\""
 		fileList=[]
 		directory=""
-		for dirContent in (self.cmdExecutor.ExecuteCommand(cmd).strip()).split("\n"):
+		for dirContent in (self.globalVariables.ExecuteCommand(cmd).strip()).split("\n"):
 			try:
 				dirContent=dirContent.strip()
 				if dirContent:
@@ -77,13 +95,14 @@ class Main:
 
 	def GetFileContent(self, device, path):
 		path=path.replace(" ", "\\ ").replace("//","/")
+		#cmd="-s "+device+" shell \"su -c cat '"+path+"'\""
 		cmd="-s "+device+" shell cat \""+path+"\""
-		return self.cmdExecutor.ExecuteCommand(cmd).strip()
+		return self.globalVariables.ExecuteCommand(cmd).strip()
 
 	def DownloadDBFile(self, device, filePath, outputPath):
 		filePath=filePath.replace(" ", "\\ ").replace("//","/")
 		cmd="-s "+device+" pull "+filePath+" \""+outputPath+"\""
-		self.cmdExecutor.ExecuteCommand(cmd)
+		self.globalVariables.ExecuteCommand(cmd)
 
 	def GetAllTables(self, dbPath):
 		tables=[]
@@ -112,26 +131,22 @@ class Main:
 
 	def ListApplication(self):
 		appList=self.GetApplicationList(self.mainWin.cmbDevice.currentText())
-		self.mainWin.lstApps.clear()
+		self.mainWin.cmbApp.clear()
 		for app in appList:
-			self.mainWin.lstApps.addItem(QListWidgetItem(app))
+			self.mainWin.cmbApp.addItem(app)
 
 	def ListApplicationContent(self):
-		items = self.mainWin.lstApps.selectedItems()
-		if len(items) == 1:
-			deviceName=self.mainWin.cmbDevice.currentText()
-			appName=str(items[0].text())
-			appContents=self.GetApplicationContent(deviceName, appName)
-			self.mainWin.lstAppDirs.clear()
-			for appContent in appContents:
-				self.mainWin.lstAppDirs.addItem(QListWidgetItem(appContent))
-		else:
-			print ("Multiple Item Selected")
+		deviceName=self.mainWin.cmbDevice.currentText()
+		appName=self.mainWin.cmbApp.currentText()
+		appContents=self.GetApplicationContent(deviceName, appName)
+		self.mainWin.lstAppDirs.clear()
+		for appContent in appContents:
+			self.mainWin.lstAppDirs.addItem(QListWidgetItem(appContent))
 
 	def ListFileFromDir(self):
-		if len(self.mainWin.lstApps.selectedItems()) == 1 and len(self.mainWin.lstAppDirs.selectedItems()) == 1:
+		if len(self.mainWin.lstAppDirs.selectedItems()) == 1:
 			deviceName=self.mainWin.cmbDevice.currentText()
-			appName=str(self.mainWin.lstApps.selectedItems()[0].text())
+			appName=self.mainWin.cmbApp.currentText()
 			appDirName=str(self.mainWin.lstAppDirs.selectedItems()[0].text())
 
 			appDirFiles=self.BuildFileStructure(deviceName, appName, appDirName)
@@ -156,6 +171,7 @@ class Main:
 				tableList=self.GetAllTables(dbPath)
 				self.mainWin.txtFileContent.setText("SQLiteDB : "+dbPath)
 				for table in tableList:
+					print (table)
 					self.mainWin.txtFileContent.append("\n\n\nTable => " + table.format(type(str), repr(str)))
 					rows=self.GetTableData(dbPath, table)
 					isFirstRow=True
@@ -184,7 +200,7 @@ class Main:
 				libPath="./lib/"+fileName
 				self.DownloadDBFile(deviceName, filePath, libPath)
 				self.mainWin.txtFileContent.setText("Performed \"strings\" command on : ELF lib :" + libPath + "\n\n")
-				self.mainWin.txtFileContent.append(self.cmdExecutor.ExecuteCommand("strings " + libPath, False))
+				self.mainWin.txtFileContent.append(self.globalVariables.ExecuteCommand("strings " + libPath, False))
 			else:
 				self.mainWin.txtFileContent.setText(fileContent)
 				
@@ -226,11 +242,49 @@ class Main:
 			self.mainWin.txtFileContent.setText(text)
 		else:
 			self.DisplayFileContent()
+
+	def FetchAPK(self):
+		apkName=self.mainWin.cmbApp.currentText()
+		appDir=self.globalVariables.ExecuteCommand("-s {} shell ls /data/app/ | grep {}".format(device, apkName)).strip()
+		self.globalVariables.ExecuteCommand("-s {} pull /data/app/{}/base.apk {}/{}.apk".format(device, appDir, self.globalVariables.outputDir, apkName))
+		return apkName
 		
+	def RunAPKTool(self):
+		apkName=self.FetchAPK()
+		self.globalVariables.ExecuteCommand("java -jar {} d {}/{}.apk -f -o {}/{}".format(self.globalVariables.apktoolPath, self.globalVariables.outputDir, apkName, self.globalVariables.outputDir, apkName), False)
+
+	def RunJDGUITool(self):
+		apkName=self.FetchAPK()
+		self.globalVariables.ExecuteCommand("{} {}/{}.apk -o {}/{}.jar".format(self.globalVariables.dex2jarPath, self.globalVariables.outputDir, apkName, self.globalVariables.outputDir, apkName), False)
+		self.globalVariables.ExecuteCommand("java -jar {} {}/{}.jar".format(self.globalVariables.jdGUIPath, self.globalVariables.outputDir, apkName), False, False)
+
+	def RunMobSFTool(self):
+		isSuccess=self.globalVariables.InitializeMobSFVariables()
+		if isSuccess:
+			apkName=self.FetchAPK()
+			self.globalVariables.ExecuteCommand("curl -F 'file=@./apps/{}.apk' {}/api/v1/upload -H \"Authorization:{}\"".format(apkName, self.globalVariables.mobSFURL, self.globalVariables.mobSFAPIKey), False, False)
+			webbrowser.open_new_tab("{}/recent_scans/".format(self.globalVariables.mobSFURL))
+
+	def RunReinstallAPK(self):
+		apkName=self.mainWin.cmbApp.currentText()
+		self.globalVariables.ExecuteCommand("java -jar {} b {}/{}/".format(self.globalVariables.apktoolPath, self.globalVariables.outputDir, apkName), False)
+		self.globalVariables.ExecuteCommand("java -jar {} {}/{}/dist/{}.apk".format(self.globalVariables.signJar, self.globalVariables.outputDir, apkName, apkName), False)
+		self.globalVariables.ExecuteCommand("uninstall {}".format(apkName))
+		self.globalVariables.ExecuteCommand("install {}/{}/dist/{}.s.apk".format(self.globalVariables.outputDir, apkName, apkName))
+	
+	def RunSnapshot(self):
+		apkName=self.mainWin.cmbApp.currentText()
+		outputDir="{}/{}_{}".format(self.globalVariables.snapshotDir, apkName, str(datetime.now()).replace(" ", "_"))
+		if not os.path.exists(outputDir):
+			os.mkdir(outputDir)
+		appDir=self.globalVariables.ExecuteCommand("-s {} shell ls /data/app/ | grep {}".format(device, apkName)).strip()
+		self.globalVariables.ExecuteCommand("-s {} pull /data/data/{}/ {}/data_data".format(device, apkName, outputDir))
+		self.globalVariables.ExecuteCommand("-s {} pull /data/app/{}/ {}/data_app".format(device, appDir, outputDir))
 
 if __name__ == "__main__":
-    print (getBanner())
     app = QtWidgets.QApplication(sys.argv)
+    app.setWindowIcon(QtGui.QIcon('./Usage/icon.png'))
+    print (getBanner())
     mainWin = Gui()
     mainWin.show()
 
@@ -241,12 +295,17 @@ if __name__ == "__main__":
 	    	mainWin.cmbDevice.addItem(device)
 
 	    mainWin.cmbDevice.currentIndexChanged.connect(lambda: main.ListApplication())
-	    mainWin.lstApps.itemClicked.connect(lambda: main.ListApplicationContent())
+	    mainWin.cmbApp.currentIndexChanged.connect(lambda: main.ListApplicationContent())
 	    mainWin.lstAppDirs.itemClicked.connect(lambda: main.ListFileFromDir())
 	    mainWin.lstAppDirFiles.itemClicked.connect(lambda: main.DisplayFileContent())
 	    mainWin.chkLogcat.stateChanged.connect(lambda: main.DisplayLogcat())
 	    mainWin.chkHtmlDecode.stateChanged.connect(lambda: main.DecodeHTMLEntity())
 	    mainWin.chkURLDecode.stateChanged.connect(lambda: main.DecodeURL())
+	    mainWin.btnAPKTool.clicked.connect(lambda: main.RunAPKTool())
+	    mainWin.btnJDGUI.clicked.connect(lambda: main.RunJDGUITool())
+	    mainWin.btnMobSF.clicked.connect(lambda: main.RunMobSFTool())
+	    mainWin.btnSnapshot.clicked.connect(lambda: main.RunSnapshot())
+	    mainWin.btnReinstall.clicked.connect(lambda: main.RunReinstallAPK())
 	    mainWin.chkLogcat.setChecked(True)
 	    mainWin.chkHtmlDecode.setVisible(False)
 	    mainWin.chkURLDecode.setVisible(False)
