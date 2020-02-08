@@ -58,4 +58,8 @@ In order to take application sandbox backup for future reference, click on "snap
 - https://stackoverflow.com/questions/11524586/accessing-logcat-from-android-via-python
 - https://payatu.com/wp-content/uploads/2016/01/diva-beta.tar.gz
 - https://pythonspot.com/pyqt5/
+- https://github.com/iBotPeaches/Apktool/releases
+- https://github.com/java-decompiler/jd-gui/releases
+- https://github.com/pxb1988/dex2jar/releases
+- https://github.com/appium/sign/tree/master/dist
 
