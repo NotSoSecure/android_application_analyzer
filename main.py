@@ -7,6 +7,8 @@
 import sqlite3
 import os
 from datetime import datetime
+import urllib
+import html
 from gui import *
 from banner import *
 from logcat import *
@@ -41,15 +43,25 @@ class Main:
 				"App not found"
 		return appList
 
-	def GetApplicationContent(self, device, appName):
-		appContents=[]
+	def GetDirContent(self, device, dir, appContents, appendPath=False):
 		#cmd="-s "+device+" shell \"su -c ls '/data/data/"+appName+"/'\""
-		cmd="-s "+device+" shell ls \"/data/data/"+appName+"/\""
+		cmd="-s "+device+" shell ls " + dir
 		for appContent in (self.globalVariables.ExecuteCommand(cmd).strip()).split("\n"):
 			try:
-				appContents.append(appContent.strip())
+				if appendPath:
+					appContents.append(dir.replace("\"","")+appContent.strip())
+				else:
+					appContents.append(appContent.strip())
 			except:
 				"No app content found"
+
+	def GetApplicationContent(self, device, appName):
+		appContents=[]
+		self.GetDirContent(device, "\"/data/data/"+appName+"/\"", appContents)
+		appDir=self.globalVariables.ExecuteCommand("-s {} shell ls /sdcard/Android/data/ | grep {}".format(device, self.mainWin.cmbApp.currentText())).strip()
+		if appDir != "":
+			print (appDir)
+			self.GetDirContent(device, "\"/sdcard/Android/data/"+appName+"/\"", appContents, True)
 		return appContents
 
 	'''def IsDirectory(self, device, path):
@@ -62,7 +74,10 @@ class Main:
 
 	def BuildFileStructure(self, device, appName, dirPath):
 		#cmd="-s "+device+" shell \"su -c ls -R '/data/data/"+appName+"/"+dirPath+"/'\""
-		cmd="-s "+device+" shell ls -R \"/data/data/"+appName+"/"+dirPath+"\""
+		if (dirPath.find("/sdcard") == 0):
+			cmd="-s "+device+" shell ls -R \""+dirPath+"\""
+		else:
+			cmd="-s "+device+" shell ls -R \"/data/data/"+appName+"/"+dirPath+"\""
 		fileList=[]
 		directory=""
 		for dirContent in (self.globalVariables.ExecuteCommand(cmd).strip()).split("\n"):
