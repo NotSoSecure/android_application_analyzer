@@ -9,6 +9,7 @@ import os
 from datetime import datetime
 import urllib
 import html
+import webbrowser 
 from gui import *
 from banner import *
 from logcat import *
