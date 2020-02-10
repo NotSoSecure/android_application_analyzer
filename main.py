@@ -19,7 +19,17 @@ class Main:
 	def __init__(self, mainWin):
 		self.mainWin=mainWin
 		self.globalVariables=GlobalVariables()
+		self.isSuNeeded = True
+		self.device=""
 
+	def ComposeCmd(self, cmd):
+		commandPath=""
+		if self.isSuNeeded:
+			commandPath="-s {} shell \"su -c {}\"".format(self.device, cmd)
+		else:
+			commandPath="-s {} shell {}".format(self.device, cmd)
+		return commandPath
+	
 	def GetDeviceList(self):
 		deviceList=[]
 		isFirstElement=True
@@ -33,10 +43,15 @@ class Main:
 				"No device found"
 		return deviceList
 
-	def GetApplicationList(self, device):
-		appList=[]
-		#cmd="-s "+device+" shell \"su -c ls '/data/data/'\""
-		cmd="-s "+device+" shell ls \"/data/data/\""
+	def GetApplicationList(self):
+		cmd=self.ComposeCmd("ls '/data/data/'")
+		output=self.globalVariables.ExecuteCommand(cmd)
+		if output.lower().find("unknown id")==0:
+			self.isSuNeeded = False
+		else:
+			self.isSuNeeded = True
+		cmd=self.ComposeCmd("ls '/data/data/'")
+		appList=[]	
 		for app in (self.globalVariables.ExecuteCommand(cmd).strip()).split("\n"):
 			try:
 				appList.append(app.strip())
@@ -44,9 +59,8 @@ class Main:
 				"App not found"
 		return appList
 
-	def GetDirContent(self, device, dir, appContents, appendPath=False):
-		#cmd="-s "+device+" shell \"su -c ls '/data/data/"+appName+"/'\""
-		cmd="-s "+device+" shell ls " + dir
+	def GetDirContent(self, dir, appContents, appendPath=False):
+		cmd=self.ComposeCmd("ls '{}'".format(dir))
 		for appContent in (self.globalVariables.ExecuteCommand(cmd).strip()).split("\n"):
 			try:
 				if appendPath:
@@ -56,29 +70,27 @@ class Main:
 			except:
 				"No app content found"
 
-	def GetApplicationContent(self, device, appName):
+	def GetApplicationContent(self, appName):
 		appContents=[]
-		self.GetDirContent(device, "\"/data/data/"+appName+"/\"", appContents)
-		appDir=self.globalVariables.ExecuteCommand("-s {} shell ls /sdcard/Android/data/ | grep {}".format(device, self.mainWin.cmbApp.currentText())).strip()
+		self.GetDirContent("/data/data/{}".format(appName), appContents)
+		cmd="{} | grep {}".format(self.ComposeCmd("ls /sdcard/Android/data/"), self.mainWin.cmbApp.currentText())
+		appDir=self.globalVariables.ExecuteCommand(cmd).strip()
 		if appDir != "":
-			print (appDir)
-			self.GetDirContent(device, "\"/sdcard/Android/data/"+appName+"/\"", appContents, True)
+			self.GetDirContent("/sdcard/Android/data/"+appName+"/", appContents, True)
 		return appContents
 
-	'''def IsDirectory(self, device, path):
-		#cmd="-s "+device+" shell \"su -c cat "+path+"'\""
-		cmd="-s "+device+" shell cat \""+path+"\""
+	'''def IsDirectory(self, path):
+		cmd=self.ComposeCmd("cat '"+path+"'")
 		cmdOutput=self.globalVariables.ExecuteCommand(cmd).strip()
 		if cmdOutput.find("Is a directory") != -1:
 			return True
 		return False'''
 
-	def BuildFileStructure(self, device, appName, dirPath):
-		#cmd="-s "+device+" shell \"su -c ls -R '/data/data/"+appName+"/"+dirPath+"/'\""
+	def BuildFileStructure(self, appName, dirPath):
 		if (dirPath.find("/sdcard") == 0):
-			cmd="-s "+device+" shell ls -R \""+dirPath+"\""
+			cmd=self.ComposeCmd("ls -R '"+dirPath+"'")
 		else:
-			cmd="-s "+device+" shell ls -R \"/data/data/"+appName+"/"+dirPath+"\""
+			cmd=self.ComposeCmd("ls -R '/data/data/"+appName+"/"+dirPath+"'")
 		fileList=[]
 		directory=""
 		for dirContent in (self.globalVariables.ExecuteCommand(cmd).strip()).split("\n"):
@@ -94,15 +106,17 @@ class Main:
 				"No file found"
 		return fileList
 
-	def GetFileContent(self, device, path):
+	def GetFileContent(self, path):
 		path=path.replace(" ", "\\ ").replace("//","/")
-		#cmd="-s "+device+" shell \"su -c cat '"+path+"'\""
-		cmd="-s "+device+" shell cat \""+path+"\""
+		cmd=self.ComposeCmd("cat '"+path+"'")
 		return self.globalVariables.ExecuteCommand(cmd).strip()
 
-	def DownloadDBFile(self, device, filePath, outputPath):
+	def DownloadDBFile(self, filePath, outputPath):
 		filePath=filePath.replace(" ", "\\ ").replace("//","/")
-		cmd="-s "+device+" pull "+filePath+" \""+outputPath+"\""
+		if self.isSuNeeded:
+			cmd="{} > '{}'".format(self.ComposeCmd("cat '"+filePath+"'"),outputPath)
+		else:
+			cmd="-s "+self.device+" pull "+filePath+" \""+outputPath+"\""
 		self.globalVariables.ExecuteCommand(cmd)
 
 	def GetAllTables(self, dbPath):
@@ -131,26 +145,25 @@ class Main:
 		return rows
 
 	def ListApplication(self):
-		appList=self.GetApplicationList(self.mainWin.cmbDevice.currentText())
+		self.device=self.mainWin.cmbDevice.currentText()
+		appList=self.GetApplicationList()
 		self.mainWin.cmbApp.clear()
 		for app in appList:
 			self.mainWin.cmbApp.addItem(app)
 
 	def ListApplicationContent(self):
-		deviceName=self.mainWin.cmbDevice.currentText()
 		appName=self.mainWin.cmbApp.currentText()
-		appContents=self.GetApplicationContent(deviceName, appName)
+		appContents=self.GetApplicationContent(appName)
 		self.mainWin.lstAppDirs.clear()
 		for appContent in appContents:
 			self.mainWin.lstAppDirs.addItem(QListWidgetItem(appContent))
 
 	def ListFileFromDir(self):
 		if len(self.mainWin.lstAppDirs.selectedItems()) == 1:
-			deviceName=self.mainWin.cmbDevice.currentText()
 			appName=self.mainWin.cmbApp.currentText()
 			appDirName=str(self.mainWin.lstAppDirs.selectedItems()[0].text())
 
-			appDirFiles=self.BuildFileStructure(deviceName, appName, appDirName)
+			appDirFiles=self.BuildFileStructure(appName, appDirName)
 			self.mainWin.lstAppDirFiles.clear()
 			for file in appDirFiles:
 				self.mainWin.lstAppDirFiles.addItem(QListWidgetItem(file))
@@ -160,19 +173,17 @@ class Main:
 	def DisplayFileContent(self):
 		mainWin.chkLogcat.setChecked(False)
 		if len(self.mainWin.lstAppDirFiles.selectedItems()) == 1:
-			deviceName=self.mainWin.cmbDevice.currentText()
 			filePath=(self.mainWin.lstAppDirFiles.selectedItems()[0].text())
-			fileContent=self.GetFileContent(deviceName, filePath).strip()
+			fileContent=self.GetFileContent(filePath).strip()
 			if fileContent.find("SQLite format 3") == 0:
 				if not os.path.exists("dbs"):
 					os.makedirs("dbs")
 				fileName=filePath[filePath.rfind('/')+1:]
 				dbPath="./dbs/"+fileName
-				self.DownloadDBFile(deviceName, filePath, dbPath)
+				self.DownloadDBFile(filePath, dbPath)
 				tableList=self.GetAllTables(dbPath)
 				self.mainWin.txtFileContent.setText("SQLiteDB : "+dbPath)
 				for table in tableList:
-					print (table)
 					self.mainWin.txtFileContent.append("\n\n\nTable => " + table.format(type(str), repr(str)))
 					rows=self.GetTableData(dbPath, table)
 					isFirstRow=True
@@ -199,7 +210,7 @@ class Main:
 					os.makedirs("lib")
 				fileName=filePath[filePath.rfind('/')+1:]
 				libPath="./lib/"+fileName
-				self.DownloadDBFile(deviceName, filePath, libPath)
+				self.DownloadDBFile(filePath, libPath)
 				self.mainWin.txtFileContent.setText("Performed \"strings\" command on : ELF lib :" + libPath + "\n\n")
 				self.mainWin.txtFileContent.append(self.globalVariables.ExecuteCommand("strings " + libPath, False))
 			else:
@@ -246,8 +257,12 @@ class Main:
 
 	def FetchAPK(self):
 		apkName=self.mainWin.cmbApp.currentText()
-		appDir=self.globalVariables.ExecuteCommand("-s {} shell ls /data/app/ | grep {}".format(device, apkName)).strip()
-		self.globalVariables.ExecuteCommand("-s {} pull /data/app/{}/base.apk {}/{}.apk".format(device, appDir, self.globalVariables.outputDir, apkName))
+		cmd="{} | grep {}".format(self.ComposeCmd("ls '/data/app/'"), apkName)
+		appDir=self.globalVariables.ExecuteCommand(cmd).strip()
+		if self.isSuNeeded:
+			self.globalVariables.ExecuteCommand("{} > {}/{}.apk".format(self.ComposeCmd("cat /data/app/{}/base.apk".format(appDir)), self.globalVariables.outputDir, apkName))
+		else:
+			self.globalVariables.ExecuteCommand("-s {} pull /data/app/{}/base.apk {}/{}.apk".format(self.device, appDir, self.globalVariables.outputDir, apkName))
 		return apkName
 		
 	def RunAPKTool(self):
@@ -270,17 +285,18 @@ class Main:
 		apkName=self.mainWin.cmbApp.currentText()
 		self.globalVariables.ExecuteCommand("java -jar {} b {}/{}/".format(self.globalVariables.apktoolPath, self.globalVariables.outputDir, apkName), False)
 		self.globalVariables.ExecuteCommand("java -jar {} {}/{}/dist/{}.apk".format(self.globalVariables.signJar, self.globalVariables.outputDir, apkName, apkName), False)
-		self.globalVariables.ExecuteCommand("uninstall {}".format(apkName))
-		self.globalVariables.ExecuteCommand("install {}/{}/dist/{}.s.apk".format(self.globalVariables.outputDir, apkName, apkName))
+		self.globalVariables.ExecuteCommand("-s {} uninstall {}".format(self.device, apkName))
+		self.globalVariables.ExecuteCommand("-s {} install {}/{}/dist/{}.s.apk".format(self.device, self.globalVariables.outputDir, apkName, apkName))
 	
 	def RunSnapshot(self):
 		apkName=self.mainWin.cmbApp.currentText()
 		outputDir="{}/{}_{}".format(self.globalVariables.snapshotDir, apkName, str(datetime.now()).replace(" ", "_"))
 		if not os.path.exists(outputDir):
 			os.mkdir(outputDir)
-		appDir=self.globalVariables.ExecuteCommand("-s {} shell ls /data/app/ | grep {}".format(device, apkName)).strip()
-		self.globalVariables.ExecuteCommand("-s {} pull /data/data/{}/ {}/data_data".format(device, apkName, outputDir))
-		self.globalVariables.ExecuteCommand("-s {} pull /data/app/{}/ {}/data_app".format(device, appDir, outputDir))
+		cmd="{} | grep {}".format(self.ComposeCmd("ls '/data/app/'"), apkName)
+		appDir=self.globalVariables.ExecuteCommand(cmd).strip()
+		self.globalVariables.ExecuteCommand("-s {} pull /data/data/{}/ {}/data_data".format(self.device, apkName, outputDir))
+		self.globalVariables.ExecuteCommand("-s {} pull /data/app/{}/ {}/data_app".format(self.device, appDir, outputDir))
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
