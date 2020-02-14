@@ -298,6 +298,26 @@ class Main:
 		self.globalVariables.ExecuteCommand("-s {} pull /data/data/{}/ {}/data_data".format(self.device, apkName, outputDir))
 		self.globalVariables.ExecuteCommand("-s {} pull /data/app/{}/ {}/data_app".format(self.device, appDir, outputDir))
 
+	def StartFridaServer(self):
+		self.globalVariables.ExecuteCommand("-s {} push {} /data/local/tmp/".format(self.device, self.globalVariables.fridaServerFileName))
+		self.globalVariables.ExecuteCommand(self.ComposeCmd("\"cd /data/local/tmp/ && chmod 755 {}\"".format(self.globalVariables.fridaServer, self.globalVariables.fridaServer)))
+		self.globalVariables.ExecuteCommand(self.ComposeCmd("\"./data/local/tmp/{} &\"".format(self.globalVariables.fridaServer)), True, False)
+		
+	def RunFridump(self):
+		self.StartFridaServer()
+		self.globalVariables.ExecuteCommand("python {} -U -s {}".format(self.globalVariables.fridumpPath, self.mainWin.cmbApp.currentText()), False)
+
+		mainWin.chkLogcat.setChecked(False)
+		output=''
+		with open(self.globalVariables.fridumpOutput) as f:
+			for line in f:
+				output += line
+		self.mainWin.txtFileContent.setText(output)
+
+	def RunUniversalFridaSSLUnPinning(self):
+		self.StartFridaServer()
+		self.globalVariables.ExecuteCommand("frida -U -f {} -l {} --no-pause".format(self.mainWin.cmbApp.currentText(), self.globalVariables.fridasslunpinscript1), False, False)
+
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     app.setWindowIcon(QtGui.QIcon('./Usage/icon.png'))
@@ -323,6 +343,8 @@ if __name__ == "__main__":
 	    mainWin.btnMobSF.clicked.connect(lambda: main.RunMobSFTool())
 	    mainWin.btnSnapshot.clicked.connect(lambda: main.RunSnapshot())
 	    mainWin.btnReinstall.clicked.connect(lambda: main.RunReinstallAPK())
+	    mainWin.btnFridaSSLUnPin.clicked.connect(lambda: main.RunUniversalFridaSSLUnPinning())
+	    mainWin.btnFridump.clicked.connect(lambda: main.RunFridump())
 	    mainWin.chkLogcat.setChecked(True)
 	    mainWin.chkHtmlDecode.setVisible(False)
 	    mainWin.chkURLDecode.setVisible(False)

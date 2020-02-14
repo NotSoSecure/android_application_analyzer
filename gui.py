@@ -61,6 +61,14 @@ class Gui(QMainWindow):
         self.btnReinstall.setGeometry(QRect(995, 185, 100, 40))
         self.btnReinstall.setText(("re-install"))
       
+        self.btnFridaSSLUnPin = QPushButton(centralWidget)
+        self.btnFridaSSLUnPin.setGeometry(QRect(780, 220, 120, 40))
+        self.btnFridaSSLUnPin.setText(("frida-sslunpin"))
+
+        self.btnFridump = QPushButton(centralWidget)
+        self.btnFridump.setGeometry(QRect(895, 220, 100, 40))
+        self.btnFridump.setText(("fridump"))
+
         self.lblFileContent = QLabel(centralWidget)
         self.lblFileContent.setGeometry(QRect(10, 230, 250, 30))
         self.lblFileContent.setText("File Content")

@@ -3,11 +3,15 @@
 The tool is used to analyze the content of the android application in local storage.
  <br /> <br />
 Install the dependency using following command 
-- `pip3 install -r requirement.txt`
+- `chmod +x setup.sh`
+- `./setup.sh`
 
 Use the following command to run the tool 
 - `python3 main.py` 
-<br /> <br />
+
+# Note
+In order to run "Fridump" and "Frida universal ssl unpinning"
+ script, Frida client must be installed on base machine <br /> <br />
 
 It will list down all the devices connected to the device as shown in Figure:
 ![Usage](Usage/1.png)
@@ -48,6 +52,8 @@ In order to take application sandbox backup for future reference, click on "snap
 - [x] The dropdown list of the application instead of Text Box
 - [x] One clikc application decompile using apktool
 - [x] One click JD GUI application navigation
+- [x] Universal Frida SSL Script to bypass ssl pinning
+- [x] Run Fridump tool to check sensitive information in application memory
 - [x] One click reinstall the APK using (uninstall app -> apktool rebuild app -> sign.jar (sign apk)-> install app)
 - [x] One click mobSF analysis (prerequisite: mobSF installation required) 
       Note: as of now update the mobSF endpoint in GlobalVariables.py and "mobSFURL" variable
@@ -62,4 +68,6 @@ In order to take application sandbox backup for future reference, click on "snap
 - https://github.com/java-decompiler/jd-gui/releases
 - https://github.com/pxb1988/dex2jar/releases
 - https://github.com/appium/sign/tree/master/dist
+- https://github.com/frida/frida/releases/download/12.8.10/frida-server-12.8.10-android-x86.xz
+- https://github.com/Nightbringer21/fridump
 

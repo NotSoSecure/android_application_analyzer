@@ -15,6 +15,11 @@ class GlobalVariables:
 		self.outputDir="./apps"
 		self.snapshotDir="./snapshots"
 		self.mobSFURL="http://localhost:8000"
+		self.fridaServer="frida-server-12.8.10-android-x86"
+		self.fridaServerFileName="./tools/{}".format(self.fridaServer)
+		self.fridumpPath="./tools/fridump/fridump.py"
+		self.fridumpOutput="./dump/strings.txt"
+		self.fridasslunpinscript1="./tools/sslunpinfridascript/script1.js"
 		self.mobSFAPIKey=""
 
 		if not os.path.exists(self.outputDir):
