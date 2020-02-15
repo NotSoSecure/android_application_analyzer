@@ -81,6 +81,10 @@ class Gui(QMainWindow):
         self.chkHtmlDecode.setGeometry(QRect(200, 230, 130, 30))
         self.chkHtmlDecode.setText("HTMLDecode")
 
+        self.chkHideDefaultApp = QCheckBox(centralWidget)
+        self.chkHideDefaultApp.setGeometry(QRect(625, 35, 180, 30))
+        self.chkHideDefaultApp.setText("Hide Default Application")
+
         self.chkLogcat = QCheckBox(centralWidget)
         self.chkLogcat.setGeometry(QRect(1020, 230, 75, 30))
         self.chkLogcat.setText("Logcat")

@@ -44,6 +44,7 @@ class Main:
 		return deviceList
 
 	def GetApplicationList(self):
+		self.isSuNeeded = True
 		cmd=self.ComposeCmd("ls '/data/data/'")
 		output=self.globalVariables.ExecuteCommand(cmd)
 		if output.lower().find("unknown id")==0:
@@ -144,12 +145,25 @@ class Main:
 			rows.append(row)
 		return rows
 
-	def ListApplication(self):
+	def HideDefaultApplication(self):
+		print ("Hide default application")
+		if mainWin.chkHideDefaultApp.isChecked():
+			self.ListApplication(True)
+		else:
+			self.ListApplication(False)
+
+	def ListApplication(self, isHide=False):
 		self.device=self.mainWin.cmbDevice.currentText()
 		appList=self.GetApplicationList()
 		self.mainWin.cmbApp.clear()
 		for app in appList:
-			self.mainWin.cmbApp.addItem(app)
+			if isHide:
+				if app.find("com.android") == 0 or app.find("com.google") == 0:
+					continue
+				else:
+					self.mainWin.cmbApp.addItem(app)
+			else:
+				self.mainWin.cmbApp.addItem(app)
 
 	def ListApplicationContent(self):
 		appName=self.mainWin.cmbApp.currentText()
@@ -299,20 +313,26 @@ class Main:
 		self.globalVariables.ExecuteCommand("-s {} pull /data/app/{}/ {}/data_app".format(self.device, appDir, outputDir))
 
 	def StartFridaServer(self):
-		self.globalVariables.ExecuteCommand("-s {} push {} /data/local/tmp/".format(self.device, self.globalVariables.fridaServerFileName))
-		self.globalVariables.ExecuteCommand(self.ComposeCmd("\"cd /data/local/tmp/ && chmod 755 {}\"".format(self.globalVariables.fridaServer, self.globalVariables.fridaServer)))
-		self.globalVariables.ExecuteCommand(self.ComposeCmd("\"./data/local/tmp/{} &\"".format(self.globalVariables.fridaServer)), True, False)
+		cmd="{} | grep {}".format(self.ComposeCmd("ps"), self.globalVariables.fridaServer)
+		output = self.globalVariables.ExecuteCommand(cmd)
+		if output.find(self.globalVariables.fridaprocessname) < 0:
+			self.globalVariables.ExecuteCommand("-s {} push {} /data/local/tmp/".format(self.device, self.globalVariables.fridaServerFileName))
+			self.globalVariables.ExecuteCommand(self.ComposeCmd("\"cd /data/local/tmp/ && chmod 755 {}\"".format(self.globalVariables.fridaServer, self.globalVariables.fridaServer)))
+			self.globalVariables.ExecuteCommand(self.ComposeCmd("\"./data/local/tmp/{} &\"".format(self.globalVariables.fridaServer)), True, False)
 		
 	def RunFridump(self):
 		self.StartFridaServer()
-		self.globalVariables.ExecuteCommand("python {} -U -s {}".format(self.globalVariables.fridumpPath, self.mainWin.cmbApp.currentText()), False)
+		try:
+			self.globalVariables.ExecuteCommand("python {} -U -s {}".format(self.globalVariables.fridumpPath, self.mainWin.cmbApp.currentText()), False)
 
-		mainWin.chkLogcat.setChecked(False)
-		output=''
-		with open(self.globalVariables.fridumpOutput) as f:
-			for line in f:
-				output += line
-		self.mainWin.txtFileContent.setText(output)
+			mainWin.chkLogcat.setChecked(False)
+			output=''
+			with open(self.globalVariables.fridumpOutput) as f:
+				for line in f:
+					output += line
+			self.mainWin.txtFileContent.setText(output)
+		except:
+			print ("Please check the application is running!!")
 
 	def RunUniversalFridaSSLUnPinning(self):
 		self.StartFridaServer()
@@ -335,6 +355,7 @@ if __name__ == "__main__":
 	    mainWin.cmbApp.currentIndexChanged.connect(lambda: main.ListApplicationContent())
 	    mainWin.lstAppDirs.itemClicked.connect(lambda: main.ListFileFromDir())
 	    mainWin.lstAppDirFiles.itemClicked.connect(lambda: main.DisplayFileContent())
+	    mainWin.chkHideDefaultApp.stateChanged.connect(lambda: main.HideDefaultApplication())
 	    mainWin.chkLogcat.stateChanged.connect(lambda: main.DisplayLogcat())
 	    mainWin.chkHtmlDecode.stateChanged.connect(lambda: main.DecodeHTMLEntity())
 	    mainWin.chkURLDecode.stateChanged.connect(lambda: main.DecodeURL())

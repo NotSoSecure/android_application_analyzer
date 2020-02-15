@@ -20,6 +20,8 @@ class GlobalVariables:
 		self.fridumpPath="./tools/fridump/fridump.py"
 		self.fridumpOutput="./dump/strings.txt"
 		self.fridasslunpinscript1="./tools/sslunpinfridascript/script1.js"
+		self.androidtmpdir="/data/local/tmp/"
+		self.fridaprocessname="{}{}".format(self.androidtmpdir, self.fridaServer)
 		self.mobSFAPIKey=""
 
 		if not os.path.exists(self.outputDir):
