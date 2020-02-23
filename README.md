@@ -73,4 +73,5 @@ Frida universal SSL unpinning and fridump support as shown in Figure:
 - https://github.com/appium/sign/tree/master/dist
 - https://github.com/frida/frida/releases/download/12.8.10/frida-server-12.8.10-android-x86.xz
 - https://github.com/Nightbringer21/fridump
+- https://codeshare.frida.re/@pcipolloni/universal-android-ssl-pinning-bypass-with-frida/
 
