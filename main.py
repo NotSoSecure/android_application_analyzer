@@ -146,7 +146,6 @@ class Main:
 		return rows
 
 	def HideDefaultApplication(self):
-		print ("Hide default application")
 		if mainWin.chkHideDefaultApp.isChecked():
 			self.ListApplication(True)
 		else:
@@ -315,10 +314,10 @@ class Main:
 	def StartFridaServer(self):
 		cmd="{} | grep {}".format(self.ComposeCmd("ps"), self.globalVariables.fridaServer)
 		output = self.globalVariables.ExecuteCommand(cmd)
-		if output.find(self.globalVariables.fridaprocessname) < 0:
-			self.globalVariables.ExecuteCommand("-s {} push {} /data/local/tmp/".format(self.device, self.globalVariables.fridaServerFileName))
-			self.globalVariables.ExecuteCommand(self.ComposeCmd("\"cd /data/local/tmp/ && chmod 755 {}\"".format(self.globalVariables.fridaServer, self.globalVariables.fridaServer)))
-			self.globalVariables.ExecuteCommand(self.ComposeCmd("\"./data/local/tmp/{} &\"".format(self.globalVariables.fridaServer)), True, False)
+		if output.find(self.globalVariables.fridaServer) < 0:
+			self.globalVariables.ExecuteCommand("-s {} push {} {}".format(self.device, self.globalVariables.fridaServerFileName, self.globalVariables.androidtmpdir))
+			self.globalVariables.ExecuteCommand(self.ComposeCmd("\"cd {} && chmod 755 {}\"".format(self.globalVariables.androidtmpdir, self.globalVariables.fridaServer)))
+			self.globalVariables.ExecuteCommand(self.ComposeCmd("\"cd {} && ./{} &\"".format(self.globalVariables.androidtmpdir, self.globalVariables.fridaServer)), True, False)
 		
 	def RunFridump(self):
 		self.StartFridaServer()
@@ -336,6 +335,7 @@ class Main:
 
 	def RunUniversalFridaSSLUnPinning(self):
 		self.StartFridaServer()
+		self.globalVariables.ExecuteCommand("-s {} push {} {}{}".format(self.device, self.globalVariables.burpCertPath, self.globalVariables.androidtmpdir, self.globalVariables.burpCertName))
 		self.globalVariables.ExecuteCommand("frida -U -f {} -l {} --no-pause".format(self.mainWin.cmbApp.currentText(), self.globalVariables.fridasslunpinscript1), False, False)
 
 if __name__ == "__main__":

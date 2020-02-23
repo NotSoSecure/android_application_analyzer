@@ -14,14 +14,15 @@ class GlobalVariables:
 		self.signJar="./tools/sign.jar"
 		self.outputDir="./apps"
 		self.snapshotDir="./snapshots"
+		self.burpCertName="burpcert.crt"
+		self.burpCertPath="./tools/{}".format(self.burpCertName)
 		self.mobSFURL="http://localhost:8000"
 		self.fridaServer="frida-server-12.8.10-android-x86"
 		self.fridaServerFileName="./tools/{}".format(self.fridaServer)
 		self.fridumpPath="./tools/fridump/fridump.py"
 		self.fridumpOutput="./dump/strings.txt"
-		self.fridasslunpinscript1="./tools/sslunpinfridascript/script1.js"
+		self.fridasslunpinscript1="./tools/fridascript/UniversalSSLUnpinning.js"
 		self.androidtmpdir="/data/local/tmp/"
-		self.fridaprocessname="{}{}".format(self.androidtmpdir, self.fridaServer)
 		self.mobSFAPIKey=""
 
 		if not os.path.exists(self.outputDir):
