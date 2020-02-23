@@ -40,6 +40,9 @@ In order to decompile application using apktool, click on "apktool" button as sh
 In order to take application sandbox backup for future reference, click on "snapshot" button as shown in Figure:
 ![Usage](Usage/9.png)
 <br /> <br />
+Frida universal SSL unpinning and fridump support as shown in Figure:
+![Usage](Usage/10.png)
+<br /> <br />
 
 # Future Enhancement
 
