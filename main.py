@@ -338,6 +338,9 @@ class Main:
 		self.globalVariables.ExecuteCommand("-s {} push {} {}{}".format(self.device, self.globalVariables.burpCertPath, self.globalVariables.androidtmpdir, self.globalVariables.burpCertName))
 		self.globalVariables.ExecuteCommand("frida -U -f {} -l {} --no-pause".format(self.mainWin.cmbApp.currentText(), self.globalVariables.fridasslunpinscript1), False, False)
 
+	def ReloadApplications(self):
+		self.HideDefaultApplication()
+
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     app.setWindowIcon(QtGui.QIcon('./Usage/icon.png'))
@@ -366,6 +369,7 @@ if __name__ == "__main__":
 	    mainWin.btnReinstall.clicked.connect(lambda: main.RunReinstallAPK())
 	    mainWin.btnFridaSSLUnPin.clicked.connect(lambda: main.RunUniversalFridaSSLUnPinning())
 	    mainWin.btnFridump.clicked.connect(lambda: main.RunFridump())
+	    mainWin.btnReloadApps.clicked.connect(lambda: main.ReloadApplications())
 	    mainWin.chkLogcat.setChecked(True)
 	    mainWin.chkHtmlDecode.setVisible(False)
 	    mainWin.chkURLDecode.setVisible(False)

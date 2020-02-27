@@ -29,6 +29,10 @@ class Gui(QMainWindow):
         self.cmbApp.setGeometry(QRect(620, 5, 375, 40))
         self.cmbApp.setObjectName(("cmbDevice")) 
 
+        self.btnReloadApps = QPushButton(centralWidget)
+        self.btnReloadApps.setGeometry(QRect(920, 35, 75, 30))
+        self.btnReloadApps.setText(("Reload"))
+
         self.btnSnapshot = QPushButton(centralWidget)
         self.btnSnapshot.setGeometry(QRect(995, 10, 100, 30))
         self.btnSnapshot.setText(("Snapshot"))
