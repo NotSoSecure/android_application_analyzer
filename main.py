@@ -282,7 +282,14 @@ class Main:
 		apkName=self.FetchAPK()
 		self.globalVariables.ExecuteCommand("java -jar {} d {}/{}.apk -f -o {}/{}".format(self.globalVariables.apktoolPath, self.globalVariables.outputDir, apkName, self.globalVariables.outputDir, apkName), False)
 
+	#Enjarify -> 
 	def RunJDGUITool(self):
+		apkName=self.FetchAPK()
+		self.globalVariables.ExecuteCommand("cd ./enjarify && python3 -O -m enjarify.main .{}/{}.apk -o .{}/{}.jar".format(self.globalVariables.outputDir, apkName, self.globalVariables.outputDir, apkName), False)
+		self.globalVariables.ExecuteCommand("java -jar {} {}/{}.jar".format(self.globalVariables.jdGUIPath, self.globalVariables.outputDir, apkName), False, False)
+
+	#Dex2Jar -> JDGUI
+	def RunJDGUITool_old(self):
 		apkName=self.FetchAPK()
 		self.globalVariables.ExecuteCommand("{} {}/{}.apk -o {}/{}.jar".format(self.globalVariables.dex2jarPath, self.globalVariables.outputDir, apkName, self.globalVariables.outputDir, apkName), False)
 		self.globalVariables.ExecuteCommand("java -jar {} {}/{}.jar".format(self.globalVariables.jdGUIPath, self.globalVariables.outputDir, apkName), False, False)
