@@ -17,18 +17,13 @@ from GlobalVariables import *
 
 class Main:
 	def __init__(self, mainWin):
+		os.system("adb root")
 		self.mainWin=mainWin
 		self.globalVariables=GlobalVariables()
-		self.isSuNeeded = True
 		self.device=""
 
 	def ComposeCmd(self, cmd):
-		commandPath=""
-		if self.isSuNeeded:
-			commandPath="-s {} shell \"su -c {}\"".format(self.device, cmd)
-		else:
-			commandPath="-s {} shell {}".format(self.device, cmd)
-		return commandPath
+		return "-s {} shell {}".format(self.device, cmd)
 	
 	def GetDeviceList(self):
 		deviceList=[]
