@@ -21,9 +21,6 @@ class Main:
 		self.globalVariables=GlobalVariables()
 		self.isSuNeeded = True
 		self.device=""
-		self.isWindowsOS = False
-		if os.name == 'nt':
-			self.isWindowsOS = True
 
 	def ComposeCmd(self, cmd):
 		commandPath=""
@@ -77,7 +74,7 @@ class Main:
 	def GetApplicationContent(self, appName):
 		appContents=[]
 		self.GetDirContent("/data/data/{}".format(appName), appContents)
-		cmd="{} | {} {}".format(self.ComposeCmd("ls /sdcard/Android/data/"), self.isWindowsOS and "findstr" or "grep", self.mainWin.cmbApp.currentText())
+		cmd="{} | {} {}".format(self.ComposeCmd("ls /sdcard/Android/data/"), self.globalVariables.isWindowsOS and "findstr" or "grep", self.mainWin.cmbApp.currentText())
 		appDir=self.globalVariables.ExecuteCommand(cmd).strip()
 		if appDir != "":
 			self.GetDirContent("/sdcard/Android/data/"+appName+"/", appContents, True)
@@ -273,7 +270,7 @@ class Main:
 
 	def FetchAPK(self):
 		apkName=self.mainWin.cmbApp.currentText()
-		cmd="{} | {} {}".format(self.ComposeCmd("ls '/data/app/'"), self.isWindowsOS and "findstr" or "grep", apkName)
+		cmd="{} | {} {}".format(self.ComposeCmd("ls '/data/app/'"), self.globalVariables.isWindowsOS and "findstr" or "grep", apkName)
 		appDir=self.globalVariables.ExecuteCommand(cmd).strip()
 		if self.isSuNeeded:
 			self.globalVariables.ExecuteCommand("{} > {}/{}.apk".format(self.ComposeCmd("cat /data/app/{}/base.apk".format(appDir)), self.globalVariables.outputDir, apkName))
@@ -287,7 +284,8 @@ class Main:
 
 	def RunJDGUITool(self):
 		apkName=self.FetchAPK()
-		self.globalVariables.ExecuteCommand("{} {}/{}.apk -o {}/{}.jar".format(self.globalVariables.dex2jarPath, self.globalVariables.outputDir, apkName, self.globalVariables.outputDir, apkName), False)
+		dex2jarPath = self.globalVariables.isWindowsOS and self.globalVariables.dex2jarPathWin or self.globalVariables.dex2jarPath
+		self.globalVariables.ExecuteCommand("{} {}/{}.apk -o {}/{}.jar --force".format(dex2jarPath, self.globalVariables.outputDir, apkName, self.globalVariables.outputDir, apkName), False)
 		self.globalVariables.ExecuteCommand("java -jar {} {}/{}.jar".format(self.globalVariables.jdGUIPath, self.globalVariables.outputDir, apkName), False, False)
 
 	def RunMobSFTool(self):
@@ -306,16 +304,16 @@ class Main:
 	
 	def RunSnapshot(self):
 		apkName=self.mainWin.cmbApp.currentText()
-		outputDir="{}/{}_{}".format(self.globalVariables.snapshotDir, apkName, str(datetime.now()).replace(" ", "_"))
+		outputDir="{}/{}_{}".format(self.globalVariables.snapshotDir, apkName, str(datetime.now()).replace(" ", "_").replace(":","_"))
 		if not os.path.exists(outputDir):
 			os.mkdir(outputDir)
-		cmd="{} | {} {}".format(self.ComposeCmd("ls '/data/app/'"), self.isWindowsOS and "findstr" or "grep", apkName)
+		cmd="{} | {} {}".format(self.ComposeCmd("ls '/data/app/'"), self.globalVariables.isWindowsOS and "findstr" or "grep", apkName)
 		appDir=self.globalVariables.ExecuteCommand(cmd).strip()
 		self.globalVariables.ExecuteCommand("-s {} pull /data/data/{}/ {}/data_data".format(self.device, apkName, outputDir))
 		self.globalVariables.ExecuteCommand("-s {} pull /data/app/{}/ {}/data_app".format(self.device, appDir, outputDir))
 
 	def StartFridaServer(self):
-		cmd="{} | {} {}".format(self.ComposeCmd("ps"), self.isWindowsOS and "findstr" or "grep", self.globalVariables.fridaServer)
+		cmd="{} | {} {}".format(self.ComposeCmd("ps"), self.globalVariables.isWindowsOS and "findstr" or "grep", self.globalVariables.fridaServer)
 		output = self.globalVariables.ExecuteCommand(cmd)
 		if output.find(self.globalVariables.fridaServer) < 0:
 			self.globalVariables.ExecuteCommand("-s {} push {} {}".format(self.device, self.globalVariables.fridaServerFileName, self.globalVariables.androidtmpdir))

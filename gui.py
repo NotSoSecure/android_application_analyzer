@@ -8,7 +8,7 @@ class Gui(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
         self.setMinimumSize(QSize(1100, 700))
-        self.setWindowTitle("Android Local stroage analyzer") 
+        self.setWindowTitle("Android Application Analyzer") 
         centralWidget = QWidget(self)          
         self.setCentralWidget(centralWidget)  
 

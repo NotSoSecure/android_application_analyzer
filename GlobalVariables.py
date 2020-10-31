@@ -10,6 +10,7 @@ class GlobalVariables:
 	def __init__(self):
 		self.apktoolPath="./tools/apktool_2.4.1.jar"
 		self.dex2jarPath="./tools/dex2jar/d2j-dex2jar.sh"
+		self.dex2jarPathWin = ".\\tools\\dex2jar\\d2j-dex2jar.bat"
 		self.jdGUIPath="./tools/jd-gui-1.6.6.jar"
 		self.signJar="./tools/sign.jar"
 		self.outputDir="./apps"
@@ -24,7 +25,10 @@ class GlobalVariables:
 		self.fridasslunpinscript1="./tools/fridascript/UniversalSSLUnpinning.js"
 		self.androidtmpdir="/data/local/tmp/"
 		self.mobSFAPIKey=""
+		self.isWindowsOS=False
 
+		if os.name == 'nt':
+			self.isWindowsOS = True
 		if not os.path.exists(self.outputDir):
 			os.mkdir(self.outputDir)
 		if not os.path.exists(self.snapshotDir):
