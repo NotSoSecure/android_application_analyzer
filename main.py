@@ -47,7 +47,7 @@ class Main:
 		self.isSuNeeded = True
 		cmd=self.ComposeCmd("ls '/data/data/'")
 		output=self.globalVariables.ExecuteCommand(cmd)
-		if output.lower().find("unknown id")==0:
+		if output.lower().find("unknown id")==0 or not output:
 			self.isSuNeeded = False
 		else:
 			self.isSuNeeded = True
