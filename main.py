@@ -115,7 +115,7 @@ class Main:
 	def DownloadDBFile(self, filePath, outputPath):
 		filePath=filePath.replace(" ", "\\ ").replace("//","/")
 		if self.isSuNeeded:
-			cmd="{} > '{}'".format(self.ComposeCmd("cat '"+filePath+"'"),outputPath)
+			cmd="{} > {}".format(self.ComposeCmd("cat '"+filePath+"'"),outputPath)
 		else:
 			cmd="-s "+self.device+" pull "+filePath+" \""+outputPath+"\""
 		self.globalVariables.ExecuteCommand(cmd)
@@ -268,14 +268,20 @@ class Main:
 		else:
 			self.DisplayFileContent()
 
-	def FetchAPK(self):
-		apkName=self.mainWin.cmbApp.currentText()
+	def GetApplicationPath(self, apkName):
 		cmd="{} | {} {}".format(self.ComposeCmd("ls '/data/app/'"), self.globalVariables.isWindowsOS and "findstr" or "grep", apkName)
 		appDir=self.globalVariables.ExecuteCommand(cmd).strip()
-		if self.isSuNeeded:
-			self.globalVariables.ExecuteCommand("{} > {}/{}.apk".format(self.ComposeCmd("cat /data/app/{}/base.apk".format(appDir)), self.globalVariables.outputDir, apkName))
-		else:
-			self.globalVariables.ExecuteCommand("-s {} pull /data/app/{}/base.apk {}/{}.apk".format(self.device, appDir, self.globalVariables.outputDir, apkName))
+
+		if appDir == "":
+			cmd=self.ComposeCmd("pm list packages -f | grep {} | cut -d':' -f2".format(apkName))
+			appDir=self.globalVariables.ExecuteCommand(cmd).strip()
+			appDir = appDir[10:appDir.rfind("/")]
+		return appDir
+
+	def FetchAPK(self):
+		apkName=self.mainWin.cmbApp.currentText()
+		appDir=self.GetApplicationPath(apkName)
+		self.globalVariables.ExecuteCommand("-s {} pull /data/app/{}/base.apk {}/{}.apk".format(self.device, appDir, self.globalVariables.outputDir, apkName))
 		return apkName
 		
 	def RunAPKTool(self):
@@ -298,9 +304,9 @@ class Main:
 	def RunReinstallAPK(self):
 		apkName=self.mainWin.cmbApp.currentText()
 		self.globalVariables.ExecuteCommand("java -jar {} b {}/{}/".format(self.globalVariables.apktoolPath, self.globalVariables.outputDir, apkName), False)
-		self.globalVariables.ExecuteCommand("java -jar {} {}/{}/dist/{}.apk".format(self.globalVariables.signJar, self.globalVariables.outputDir, apkName, apkName), False)
+		self.globalVariables.ExecuteCommand("java -jar {} -a {}/{}/dist/{}.apk".format(self.globalVariables.signJar, self.globalVariables.outputDir, apkName, apkName), False)
 		self.globalVariables.ExecuteCommand("-s {} uninstall {}".format(self.device, apkName))
-		self.globalVariables.ExecuteCommand("-s {} install {}/{}/dist/{}.s.apk".format(self.device, self.globalVariables.outputDir, apkName, apkName))
+		self.globalVariables.ExecuteCommand("-s {} install {}/{}/dist/{}-aligned-debugSigned.apk".format(self.device, self.globalVariables.outputDir, apkName, apkName))
 	
 	def RunSnapshot(self):
 		apkName=self.mainWin.cmbApp.currentText()

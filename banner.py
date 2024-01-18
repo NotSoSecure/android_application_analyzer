@@ -27,7 +27,7 @@ def getBanner():
                                     __/ |                               
                                    |___/       
 ------------------------------------------------------------------------------                                 
-NotSoSecure (c) 2020 | Developed by Sanjay Gondaliya - www.sanjaygondaliya.com
+NotSoSecure (c) 2024 | Developed by Sanjay Gondaliya - www.sanjaygondaliya.com
 ------------------------------------------------------------------------------
    
 	  """

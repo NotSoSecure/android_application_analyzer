@@ -8,17 +8,17 @@ class GlobalVariables:
 	isClose=False
 	"""docstring for GlobalVariables"""
 	def __init__(self):
-		self.apktoolPath="./tools/apktool_2.4.1.jar"
+		self.apktoolPath="./tools/apktool_2.9.2.jar"
 		self.dex2jarPath="./tools/dex2jar/d2j-dex2jar.sh"
 		self.dex2jarPathWin = ".\\tools\\dex2jar\\d2j-dex2jar.bat"
 		self.jdGUIPath="./tools/jd-gui-1.6.6.jar"
-		self.signJar="./tools/sign.jar"
+		self.signJar="./tools/uber-apk-signer-1.3.0.jar"
 		self.outputDir="./apps"
 		self.snapshotDir="./snapshots"
 		self.burpCertName="burpcert.crt"
 		self.burpCertPath="./tools/{}".format(self.burpCertName)
 		self.mobSFURL="http://localhost:8000"
-		self.fridaServer="frida-server-12.8.10-android-x86"
+		self.fridaServer="frida-server-16.1.11-android-x86"
 		self.fridaServerFileName="./tools/{}".format(self.fridaServer)
 		self.fridumpPath="./tools/fridump/fridump.py"
 		self.fridumpOutput="./dump/strings.txt"
@@ -52,6 +52,7 @@ class GlobalVariables:
 			command = "adb " + cmd
 		else:
 			command = cmd
+		print (cmd)
 		p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
 		if syncCall:
 			output = p.communicate()[0].decode("utf-8", errors="ignore")

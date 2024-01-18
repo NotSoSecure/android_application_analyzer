@@ -1,5 +1,4 @@
 PyQt5
-pysqlite3
 HTMLParser
 bs4
 requests

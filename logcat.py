@@ -17,6 +17,7 @@ class AsynchronousFileRead(QThread):
     def run(self):
         '''The body of the tread: read lines and put them on the queue.'''
         for line in iter(self._fd.readline, ''):
+            QThread.msleep(10)
             if GlobalVariables.isClose:
                 break
             self._queue.put(line)
@@ -44,7 +45,7 @@ class Logcat(QThread):
                 break
             
             while not self.stdout_queue.empty():
-                line+=str(self.stdout_queue.get(), 'utf-8')
+                line+=self.stdout_queue.get().decode(encoding='unicode_escape')
             
             if line:
                 self.mainWin.txtLogcat.append(line.strip())
