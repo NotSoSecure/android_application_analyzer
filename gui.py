@@ -80,11 +80,11 @@ class Gui(QMainWindow):
         self.btnReinstall.setText(("re-install"))
       
         self.btnFridaSSLUnPin = QPushButton(centralWidget)
-        self.btnFridaSSLUnPin.setGeometry(QRect(780, 220+variation, 120-variation, defaultSize))
+        self.btnFridaSSLUnPin.setGeometry(QRect(720, 220+variation, 120-variation, defaultSize))
         self.btnFridaSSLUnPin.setText(("frida-sslunpin"))
 
         self.btnFridump = QPushButton(centralWidget)
-        self.btnFridump.setGeometry(QRect(895, 220+variation, 100-variation, defaultSize))
+        self.btnFridump.setGeometry(QRect(840, 220+variation, 100-variation, defaultSize))
         self.btnFridump.setText(("fridump"))
 
         self.lblFileContent = QLabel(centralWidget)
@@ -102,6 +102,10 @@ class Gui(QMainWindow):
         self.chkHideDefaultApp = QCheckBox(centralWidget)
         self.chkHideDefaultApp.setGeometry(QRect(625-variation, 35, 180, defaultSize))
         self.chkHideDefaultApp.setText("Hide Default Application")
+      
+        self.chkSplitConfig = QCheckBox(centralWidget)
+        self.chkSplitConfig.setGeometry(QRect(940+variation*3, 230, 75, defaultSize))
+        self.chkSplitConfig.setText(("split-config"))
 
         self.chkLogcat = QCheckBox(centralWidget)
         self.chkLogcat.setGeometry(QRect(1020+variation*3, 230, 75, defaultSize))

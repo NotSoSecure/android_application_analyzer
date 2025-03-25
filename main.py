@@ -21,6 +21,7 @@ class Main:
 		self.globalVariables=GlobalVariables()
 		self.isSuNeeded = True
 		self.device=""
+		self.isSplitConfig = False
 
 	def ComposeCmd(self, cmd):
 		commandPath=""
@@ -240,6 +241,12 @@ class Main:
 			text=text.encode('ascii', 'ignore') 
 			self.mainWin.txtFileContent.setText(text)
 
+	def ChangeSplitConfigValue(self):
+		if mainWin.chkSplitConfig.isChecked():
+			self.isSplitConfig = True
+		else:
+			self.isSplitConfig = False
+
 	def DisplayLogcat(self):
 		if mainWin.chkLogcat.isChecked():
 			mainWin.chkURLDecode.setVisible(False)
@@ -305,9 +312,20 @@ class Main:
 		apkName=self.mainWin.cmbApp.currentText()
 		self.globalVariables.ExecuteCommand("java -jar {} b {}/{}/".format(self.globalVariables.apktoolPath, self.globalVariables.outputDir, apkName), False)
 		self.globalVariables.ExecuteCommand("java -jar {} -a {}/{}/dist/{}.apk".format(self.globalVariables.signJar, self.globalVariables.outputDir, apkName, apkName), False)
-		self.globalVariables.ExecuteCommand("-s {} uninstall {}".format(self.device, apkName))
-		self.globalVariables.ExecuteCommand("-s {} install {}/{}/dist/{}-aligned-debugSigned.apk".format(self.device, self.globalVariables.outputDir, apkName, apkName))
-	
+		
+		if(self.isSplitConfig):
+			appPath =  self.GetApplicationPath(apkName)
+			cmd=self.ComposeCmd("rm '/data/app/{}/base.apk'".format(appPath))
+			self.globalVariables.ExecuteCommand(cmd).strip()
+
+			self.globalVariables.ExecuteCommand("-s {} push {}/{}/dist/{}-aligned-debugSigned.apk /data/local/tmp/base.apk".format(self.device, self.globalVariables.outputDir, apkName, apkName, appPath))
+
+			cmd=self.ComposeCmd("mv '/data/local/tmp/base.apk /data/app/{}/base.apk'".format(appPath))
+			self.globalVariables.ExecuteCommand(cmd).strip()
+		else:
+			self.globalVariables.ExecuteCommand("-s {} uninstall {}".format(self.device, apkName))
+			self.globalVariables.ExecuteCommand("-s {} install {}/{}/dist/{}-aligned-debugSigned.apk".format(self.device, self.globalVariables.outputDir, apkName, apkName))
+		
 	def RunSnapshot(self):
 		apkName=self.mainWin.cmbApp.currentText()
 		outputDir="{}/{}_{}".format(self.globalVariables.snapshotDir, apkName, str(datetime.now()).replace(" ", "_").replace(":","_"))
@@ -366,6 +384,7 @@ if __name__ == "__main__":
 	    mainWin.lstAppDirs.itemClicked.connect(lambda: main.ListFileFromDir())
 	    mainWin.lstAppDirFiles.itemClicked.connect(lambda: main.DisplayFileContent())
 	    mainWin.chkHideDefaultApp.stateChanged.connect(lambda: main.HideDefaultApplication())
+	    mainWin.chkSplitConfig.stateChanged.connect(lambda: main.ChangeSplitConfigValue())
 	    mainWin.chkLogcat.stateChanged.connect(lambda: main.DisplayLogcat())
 	    mainWin.chkHtmlDecode.stateChanged.connect(lambda: main.DecodeHTMLEntity())
 	    mainWin.chkURLDecode.stateChanged.connect(lambda: main.DecodeURL())

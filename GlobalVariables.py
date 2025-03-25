@@ -52,7 +52,6 @@ class GlobalVariables:
 			command = "adb " + cmd
 		else:
 			command = cmd
-		print (cmd)
 		p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
 		if syncCall:
 			output = p.communicate()[0].decode("utf-8", errors="ignore")
