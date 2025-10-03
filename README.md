@@ -6,8 +6,12 @@ Install the dependency using following command
 - `chmod +x setup.sh`
 - `./setup.sh`
 
-Use the following command to run the tool 
-- `python3 main.py` 
+Use the following command to run the tool using python3
+- `python -m venv android_application_analyzer` 
+- `android_application_analyzer\Scripts\activate` 
+- `pip install -r requirements.txt` 
+- `python main.py` 
+
 
 # Note
 In order to run "Fridump" and "Frida universal ssl unpinning"

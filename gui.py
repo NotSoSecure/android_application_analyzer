@@ -1,21 +1,22 @@
 import sys
-from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import QSize, QRect
+from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6.QtWidgets import *
+from PySide6.QtCore import QSize, QRect
 from GlobalVariables import *
 
 class Gui(QMainWindow):
     def __init__(self):
-        QMainWindow.__init__(self)
+        super().__init__()
         self.setMinimumSize(QSize(1100, 700))
-        self.setWindowTitle("Android Application Analyzer") 
-        centralWidget = QWidget(self)          
-        self.setCentralWidget(centralWidget)  
+        self.setWindowTitle("Android Application Analyzer")
 
-        quit = QAction("Quit", self)
-        quit.triggered.connect(self.closeEvent)
-        
-        globalVariables=GlobalVariables()
+        centralWidget = QWidget(self)
+        self.setCentralWidget(centralWidget)
+
+        quit_action = QtGui.QAction("Quit", self)
+        quit_action.triggered.connect(self.close)
+
+        globalVariables = GlobalVariables()
         defaultSize = 40
         topMargin = 5
         funBtnStartPost = 65
@@ -26,91 +27,81 @@ class Gui(QMainWindow):
             funBtnStartPost = 70
             variation = 5
 
-        self.device_lable = QLabel(centralWidget)
+        # Device label + combobox
+        self.device_lable = QLabel("Select Device", centralWidget)
         self.device_lable.setGeometry(QRect(10, topMargin, 85, defaultSize))
-        self.device_lable.setText("Select Device")
         self.cmbDevice = QComboBox(centralWidget)
         self.cmbDevice.setGeometry(QRect(95, topMargin, 400, defaultSize))
-        self.cmbDevice.setObjectName(("cmbDevice")) 
+        self.cmbDevice.setObjectName("cmbDevice")
 
-        self.app_label = QLabel(centralWidget)
+        # Application label + combobox
+        self.app_label = QLabel("Select Application", centralWidget)
         self.app_label.setGeometry(QRect(510, topMargin, 110, defaultSize))
-        self.app_label.setText("Select Application")
         self.cmbApp = QComboBox(centralWidget)
         self.cmbApp.setGeometry(QRect(620, topMargin, 375 - variation, defaultSize))
-        self.cmbApp.setObjectName(("cmbDevice")) 
+        self.cmbApp.setObjectName("cmbApp")
 
-        self.btnReloadApps = QPushButton(centralWidget)
+        # Reload / Snapshot
+        self.btnReloadApps = QPushButton("Reload", centralWidget)
         self.btnReloadApps.setGeometry(QRect(920, 35 + variation, 75 - variation, defaultSize))
-        self.btnReloadApps.setText(("Reload"))
 
-        self.btnSnapshot = QPushButton(centralWidget)
+        self.btnSnapshot = QPushButton("Snapshot", centralWidget)
         self.btnSnapshot.setGeometry(QRect(995, topMargin, 100, defaultSize))
-        self.btnSnapshot.setText(("Snapshot"))
 
-        self.appDirs = QLabel(centralWidget)
+        # Directories
+        self.appDirs = QLabel("Select Directory", centralWidget)
         self.appDirs.setGeometry(QRect(10, 40, 250, defaultSize))
-        self.appDirs.setText("Select Directory")
         self.lstAppDirs = QListWidget(centralWidget)
-        self.lstAppDirs.setGeometry(QRect(10, 75-variation, 250, 145))
+        self.lstAppDirs.setGeometry(QRect(10, 75 - variation, 250, 145))
 
-        self.appDirFiles = QLabel(centralWidget)
+        self.appDirFiles = QLabel("Select File", centralWidget)
         self.appDirFiles.setGeometry(QRect(270, 40, 480, defaultSize))
-        self.appDirFiles.setText("Select File")
         self.lstAppDirFiles = QListWidget(centralWidget)
-        self.lstAppDirFiles.setGeometry(QRect(270, 75-variation, 720, 145))
+        self.lstAppDirFiles.setGeometry(QRect(270, 75 - variation, 720, 145))
 
-        self.btnJDGUI = QPushButton(centralWidget)
+        # Tool buttons
+        self.btnJDGUI = QPushButton("jdgui", centralWidget)
         self.btnJDGUI.setGeometry(QRect(995, funBtnStartPost, 100, defaultSize))
-        self.btnJDGUI.setText(("jdgui"))
 
-        funBtnStartPost = funBtnStartPost + 40
-        self.btnMobSF = QPushButton(centralWidget)
+        funBtnStartPost += 40
+        self.btnMobSF = QPushButton("mobSF", centralWidget)
         self.btnMobSF.setGeometry(QRect(995, funBtnStartPost, 100, defaultSize))
-        self.btnMobSF.setText(("mobSF"))
 
-        funBtnStartPost = funBtnStartPost + 40
-        self.btnAPKTool = QPushButton(centralWidget)
+        funBtnStartPost += 40
+        self.btnAPKTool = QPushButton("apktool", centralWidget)
         self.btnAPKTool.setGeometry(QRect(995, funBtnStartPost, 100, defaultSize))
-        self.btnAPKTool.setText(("apktool"))
 
-        funBtnStartPost = funBtnStartPost + 40
-        self.btnReinstall = QPushButton(centralWidget)
+        funBtnStartPost += 40
+        self.btnReinstall = QPushButton("re-install", centralWidget)
         self.btnReinstall.setGeometry(QRect(995, funBtnStartPost, 100, defaultSize))
-        self.btnReinstall.setText(("re-install"))
-      
-        self.btnFridaSSLUnPin = QPushButton(centralWidget)
-        self.btnFridaSSLUnPin.setGeometry(QRect(720, 220+variation, 120-variation, defaultSize))
-        self.btnFridaSSLUnPin.setText(("frida-sslunpin"))
 
-        self.btnFridump = QPushButton(centralWidget)
-        self.btnFridump.setGeometry(QRect(840, 220+variation, 100-variation, defaultSize))
-        self.btnFridump.setText(("fridump"))
+        # Frida buttons
+        self.btnFridaSSLUnPin = QPushButton("frida-sslunpin", centralWidget)
+        self.btnFridaSSLUnPin.setGeometry(QRect(720, 220 + variation, 120 - variation, defaultSize))
 
-        self.lblFileContent = QLabel(centralWidget)
+        self.btnFridump = QPushButton("fridump", centralWidget)
+        self.btnFridump.setGeometry(QRect(840, 220 + variation, 100 - variation, defaultSize))
+
+        # File content section
+        self.lblFileContent = QLabel("File Content", centralWidget)
         self.lblFileContent.setGeometry(QRect(10, 230, 250, defaultSize))
-        self.lblFileContent.setText("File Content")
-      
-        self.chkURLDecode = QCheckBox(centralWidget)
+
+        self.chkURLDecode = QCheckBox("URLDecode", centralWidget)
         self.chkURLDecode.setGeometry(QRect(100, 230, 130, defaultSize))
-        self.chkURLDecode.setText("URLDecode")
 
-        self.chkHtmlDecode = QCheckBox(centralWidget)
+        self.chkHtmlDecode = QCheckBox("HTMLDecode", centralWidget)
         self.chkHtmlDecode.setGeometry(QRect(200, 230, 130, defaultSize))
-        self.chkHtmlDecode.setText("HTMLDecode")
 
-        self.chkHideDefaultApp = QCheckBox(centralWidget)
-        self.chkHideDefaultApp.setGeometry(QRect(625-variation, 35, 180, defaultSize))
-        self.chkHideDefaultApp.setText("Hide Default Application")
-      
-        self.chkSplitConfig = QCheckBox(centralWidget)
-        self.chkSplitConfig.setGeometry(QRect(940+variation*3, 230, 75, defaultSize))
-        self.chkSplitConfig.setText(("split-config"))
+        self.chkHideDefaultApp = QCheckBox("Hide Default Application", centralWidget)
+        self.chkHideDefaultApp.setGeometry(QRect(625 - variation, 35, 180, defaultSize))
 
-        self.chkLogcat = QCheckBox(centralWidget)
-        self.chkLogcat.setGeometry(QRect(1020+variation*3, 230, 75, defaultSize))
-        self.chkLogcat.setText("Logcat")
-        
+        self.chkSplitConfig = QCheckBox("split-config", centralWidget)
+        self.chkSplitConfig.setGeometry(QRect(940 + variation * 3, 230, 75, defaultSize))
+
+        self.chkLogcat = QCheckBox("Logcat", centralWidget)
+        self.chkLogcat.setGeometry(QRect(1020 + variation * 3, 230, 75, defaultSize))
+
+        # Text areas
         self.txtFileContent = QTextEdit(centralWidget)
         self.txtFileContent.setGeometry(QRect(10, 260, 1080, 430))
 
@@ -118,4 +109,5 @@ class Gui(QMainWindow):
         self.txtLogcat.setGeometry(QRect(10, 260, 1080, 430))
 
     def closeEvent(self, event):
-        GlobalVariables.isClose=True
+        GlobalVariables.isClose = True
+        event.accept()  # make sure window closes properly

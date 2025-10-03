@@ -338,3 +338,7 @@ ASALocalRun/
 
 # Removing Mac specific atrocities
 .DS_Store
+
+
+apps/*
+android_application_analyzer/*

@@ -403,7 +403,7 @@ if __name__ == "__main__":
 	    logcat=Logcat(mainWin, mainWin.cmbDevice.currentText())
 	    logcat.start()
 	    main.ListApplication()
-	    sys.exit( app.exec_() )
+	    sys.exit( app.exec() )
     else:
     	print ("No emulator found. Re-run the applicaiton after connecting device\n\n")
 
