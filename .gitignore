@@ -342,3 +342,5 @@ ASALocalRun/
 
 apps/*
 android_application_analyzer/*
+dbs/*
+snapshots/*
